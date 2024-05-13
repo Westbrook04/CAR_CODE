@@ -647,88 +647,40 @@ Output  : none
 入口参数：无
 返回  值：无
 **************************************************************************/
+//串口1中断服务程序
+//注意,读取USARTx->SR能避免莫名其妙的错误   	
+u8 uart_buf[USART_REC_LEN];     //接收缓冲,最大USART_REC_LEN个字节.
+//接收状态
+//bit15，	接收完成标志
+//bit14，	接收到0x0d
+//bit13~0，	接收到的有效字节数目
+u16 recv_ok=0;       //接收状态标记	
+u16 uart_cnt=0;
 int USART3_IRQHandler(void)
 {	
-	static u8 Count_car,Count_moveit;
-	static u8 rxbuf_moveit[16];
-	u8 Usart_Receive;
-	int check=0,error=1,i;
 
-	if(USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) //Check if data is received //判断是否接收到数据
+	uint8_t d;
+ 
+	//检测标志位
+	if(USART_GetITStatus(USART3, USART_IT_RXNE)==SET)
 	{
-		Usart_Receive = USART_ReceiveData(USART3);//Read the data //读取数据
-		if(Time_count<CONTROL_DELAY)
-			// Data is not processed until 10 seconds after startup
-		  //开机10秒前不处理数据
-		  return 0;	
-		
-		//Fill the array with serial data
-		//串口数据填入数组
-    Receive_Data.buffer[Count_car]=Usart_Receive;
-		rxbuf_moveit[Count_moveit]=Usart_Receive;
-		
-		
-		// Ensure that the first data in the array is FRAME_HEADER
-		//确保数组第一个数据为FRAME_HEADER
-		if(Usart_Receive == FRAME_HEADER_CAR||Count_car>0) Count_car++; else Count_car=0; //接收控制底盘的数据帧
-		if(Usart_Receive == FRAME_HEADER_MOVEIT||Count_moveit>0) Count_moveit++; else Count_moveit=0; //接收控制机械臂的数据帧
-		if (Count_car == 11) //Verify the length of the packet //验证数据包的长度
-		{   
-				Count_car=0; //Prepare for the serial port data to be refill into the array //为串口数据重新填入数组做准备
-				if(Receive_Data.buffer[10] == FRAME_TAIL_CAR) //Verify the frame tail of the packet //验证数据包的帧尾
-				{
-					//Data exclusionary or bit check calculation, mode 0 is sent data check
-					//数据异或位校验计算，模式0是发送数据校验
-					if(Receive_Data.buffer[9] ==Check_Sum(9,0))	 
-				  {		
-						//All modes flag position 0, USART3 control mode
-            //所有模式标志位置0，为Usart3控制模式						
-						PS2_ON_Flag=0;
-						Remote_ON_Flag=0;
-						APP_ON_Flag=0;
-						CAN_ON_Flag=0;
-						Usart1_ON_Flag=0;
-						Usart5_ON_Flag=0;
-						command_lost_count=0; //CAN/串口控制命令丢失计数清零
-						
-						//Calculate the target speed of three axis from serial data, unit m/s
-						//从串口数据求三轴目标速度， 单位m/s
-						Move_X=XYZ_Target_Speed_transition(Receive_Data.buffer[3],Receive_Data.buffer[4]);
-						Move_Y=XYZ_Target_Speed_transition(Receive_Data.buffer[5],Receive_Data.buffer[6]);
-						Move_Z=XYZ_Target_Speed_transition(Receive_Data.buffer[7],Receive_Data.buffer[8]);
-				  }
-					
-			}
+		//接收数据
+		d = USART_ReceiveData(USART3);
+	    //将接收到的数据依次保存到数组里
+		uart_buf[uart_cnt++] = d;  
+		//GM65模块发完一组数据后会自动发送一个回车符，所以通过检测是否接受到回车来判断数据是否接收完成
+		if(d == 0x0D) 
+		{
+			recv_ok = 1;  //接收完成
 		}
-		  if (Count_moveit == 11)	//验证数据包的长度
-		{   
-				Count_moveit=0;//重新开始接收
-				if(rxbuf_moveit[10] == FRAME_TAIL_MOVEIT) //验证数据包的尾部校验信息
-				{
-					 
-					for(i=0; i<9; i++)
-					{
-						check=rxbuf_moveit[i]^check; //异或，用于检测数据是否出错
-					}
-					if(check==rxbuf_moveit[9]) error=0; //检验成功
-					
-					if(error==0)	 //数据校验位计算
-				  {		
-						Moveit_Angle1=(short)((rxbuf_moveit[1]<<8)+(rxbuf_moveit[2])); //求X轴速度 分高8位和低8位 单位mm/s
-						Moveit_Angle2=(short)((rxbuf_moveit[3]<<8)+(rxbuf_moveit[4])); //求X轴速度 分高8位和低8位 单位mm/s
-						Moveit_Angle3=(short)((rxbuf_moveit[5]<<8)+(rxbuf_moveit[6])); //求Z轴速度 分高8位和低8位 单位mm/s
-						Moveit_Angle4=(short)((rxbuf_moveit[7]<<8)+(rxbuf_moveit[8])); //求Z轴速度 分高8位和低8位 单位mm/s					
-						
-						Moveit_Angle1=-Moveit_Angle1*0.001f; //单位(弧度)
-						Moveit_Angle2= Moveit_Angle2*0.001f; 
-						Moveit_Angle3= Moveit_Angle3*0.001f; 
-						Moveit_Angle4=-Moveit_Angle4*0.001f;
 	
-					}
-			  }
-		 }
-	} 
-  return 0;	
+		//将接收到的数据，通过串口1返发给PC
+		USART_SendData(USART1, d);
+	    while( USART_GetFlagStatus(USART1, USART_FLAG_TXE)==RESET); //等待发送完成
+		USART_ClearFlag(USART1,USART_FLAG_TXE);         //清空标志位
+		USART_ClearITPendingBit(USART3,USART_IT_RXNE);	//清空标志位
+	}
+
 }
 
 /**************************************************************************

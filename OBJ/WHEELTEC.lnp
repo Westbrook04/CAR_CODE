@@ -13,6 +13,7 @@
 "..\obj\timer.o"
 "..\obj\usartx.o"
 "..\obj\f4_flash.o"
+"..\obj\gm65.o"
 "..\obj\delay.o"
 "..\obj\sys.o"
 "..\obj\usart.o"

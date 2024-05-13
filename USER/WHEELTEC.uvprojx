@@ -458,6 +458,11 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\F4_flash.c</FilePath>
             </File>
+            <File>
+              <FileName>GM65.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\GM65.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

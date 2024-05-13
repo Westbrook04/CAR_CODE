@@ -219,11 +219,11 @@ void OLED_Init(void)
 	
 	//Enable pB port clock
 	//使能PB端口时钟
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD  , ENABLE);  //使能GPIOC
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG  , ENABLE);  //使能GPIOC
 
 	//Port configuration
 	//端口配置
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11|GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7|GPIO_Pin_6|GPIO_Pin_5|GPIO_Pin_4;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;   //输出
 	GPIO_InitStructure.GPIO_OType =GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_Speed =GPIO_Speed_2MHz;  //2M

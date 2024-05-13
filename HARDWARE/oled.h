@@ -5,17 +5,17 @@
 
 //Oled port macro definition
 //OLED端口宏定义
-#define OLED_RST_Clr() PDout(12)=0   //RST
-#define OLED_RST_Set() PDout(12)=1   //RST
+#define OLED_RST_Clr() PGout(5)=0   //RST
+#define OLED_RST_Set() PGout(5)=1   //RST
 
-#define OLED_RS_Clr()  PDout(11)=0   //DC
-#define OLED_RS_Set()  PDout(11)=1   //DC
+#define OLED_RS_Clr()  PGout(4)=0   //DC
+#define OLED_RS_Set()  PGout(4)=1   //DC
 
-#define OLED_SCLK_Clr()  PDout(14)=0   //SCL
-#define OLED_SCLK_Set()  PDout(14)=1   //SCL
+#define OLED_SCLK_Clr()  PGout(7)=0   //SCL
+#define OLED_SCLK_Set()  PGout(7)=1   //SCL
 
-#define OLED_SDIN_Clr()  PDout(13)=0   //SDA
-#define OLED_SDIN_Set()  PDout(13)=1   //SDA
+#define OLED_SDIN_Clr()  PGout(6)=0   //SDA
+#define OLED_SDIN_Set()  PGout(6)=1   //SDA
 #define OLED_CMD  0	//Command //写命令
 #define OLED_DATA 1	//Data //写数据
 

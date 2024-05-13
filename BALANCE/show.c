@@ -20,6 +20,7 @@ void show_task(void *pvParameters)
    u32 lastWakeTime = getSysTickCnt();
    while(1)
    {	
+
 		int i=0;
 		static int LowVoltage_1=0, LowVoltage_2=0;
 		static int Servo_adjust_timecount;
@@ -88,7 +89,7 @@ void oled_show(void)
 		 if(Car_Mode_Show>2)Car_Mode_Show=2;
 		 Voltage_Show=Voltage*100; 
 		 count++;
-	
+		OLED_ShowString(0,0,"Mec ");
 	 //Collect the tap information of the potentiometer, 
 	 //and display the car model to be fitted when the car starts up in real time
 	 //采集电位器档位信息，实时显示小车开机时要适配的小车型号

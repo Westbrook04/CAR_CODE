@@ -8,15 +8,15 @@
 
 
 /*--------Buzzer control pin--------*/
-#define Buzzer_PORT GPIOA
-#define Buzzer_PIN GPIO_Pin_8
-#define Buzzer PAout(8)
+#define Buzzer_PORT GPIOG
+#define Buzzer_PIN GPIO_Pin_11
+#define Buzzer PGout(11)
 /*----------------------------------*/
 
 /*--------LED control pin--------*/
-#define LED_PORT GPIOA
-#define LED_PIN GPIO_Pin_12
-#define LED PAout(12) 
+#define LED_PORT GPIOE
+#define LED_PIN GPIO_Pin_3
+#define LED PEout(3) 
 /*----------------------------------*/
 
 void LED_Init(void);  
